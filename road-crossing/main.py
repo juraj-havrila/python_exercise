@@ -34,8 +34,8 @@ while game_is_on:
         cycle =0
         traffic.append(CarManager())
     for car in traffic:
-        if increase_speed:
-            car.speed_up()
+        #if increase_speed:
+        #    car.speed_up()
         car.move()
         if car.distance(player) < 20:
             game_is_on = False
