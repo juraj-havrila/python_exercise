@@ -2,6 +2,7 @@ import tkinter
 from tkinter import messagebox
 import random
 import pyperclip
+import json
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generate_password():
     my_entry_password.delete(0,100)
@@ -42,6 +43,13 @@ def write_file():
     my_website = my_entry_website.get()
     my_username = my_entry_username.get()
     my_password = my_entry_password.get()
+    new_data ={
+        my_website: {
+            "email": my_username,
+            "password": my_password
+
+        }
+    }
 
     if my_website == "" or my_username == "" or my_password == "":
         messagebox.showinfo("Error", "Please fill all fields")
@@ -49,8 +57,12 @@ def write_file():
         is_ok = tkinter.messagebox.askokcancel(title=my_website, message=f"You entered \nusername: {my_username}"
                                                                          f"\npassword: {my_password}\n Is it ok to save?")
         if is_ok:
-            with open("data.txt", mode="a") as file:
-                file.write(f"{my_website} | {my_username} | {my_password}\n")
+            with open("data.json", mode="r") as data_file:
+                data = json.load(data_file)
+                data.update(new_data)
+            with open("data.json", mode="w") as data_file:
+                json.dump(data, data_file, indent=4)
+                
                 my_entry_website.delete(0, 100)
                 my_entry_password.delete(0, 100)
 
@@ -73,5 +85,9 @@ my_button_password = tkinter.Button(text="Generate Password", command=generate_p
 my_button_password.grid(row=3, column=2)
 my_button_add = tkinter.Button(text="Add", width=36, command=write_file)
 my_button_add.grid(row=4, column=1,columnspan=2)
+
+
+
+
 
 window.mainloop()
