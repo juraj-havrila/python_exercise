@@ -25,7 +25,28 @@ def generate_password():
     my_entry_password.insert(0, password)
     pyperclip.copy(password)
 
-# ---------------------------- SAVE PASSWORD ------------------------------- #
+# ---------------------------- Search PASSWORD ------------------------------- #
+def search_password():
+    my_website = my_entry_website.get()
+    try:
+        with open("data.json", mode="r") as data_file:
+            data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showinfo("Error", "Data file not found.")
+    else:
+        if my_website in data:
+            my_email = data[my_website]["email"]
+            my_password = data[my_website]["password"]
+            messagebox.showinfo(title=my_website, message=f"Email: {my_email}, Password: {my_password}")
+        else:
+            messagebox.showinfo("Info", f"No data for {my_website} found")
+
+
+
+    finally:
+        my_entry_website.delete(0, 100)
+        my_entry_password.delete(0, 100)
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 
@@ -57,12 +78,17 @@ def write_file():
         is_ok = tkinter.messagebox.askokcancel(title=my_website, message=f"You entered \nusername: {my_username}"
                                                                          f"\npassword: {my_password}\n Is it ok to save?")
         if is_ok:
-            with open("data.json", mode="r") as data_file:
-                data = json.load(data_file)
+            try:
+                with open("data.json", mode="r") as data_file:
+                    data = json.load(data_file)
+            except FileNotFoundError:
+                with open("data.json", mode="w") as data_file:
+                    json.dump(data, data_file, indent=4)
+            else:
                 data.update(new_data)
-            with open("data.json", mode="w") as data_file:
-                json.dump(data, data_file, indent=4)
-                
+                with open("data.json", mode="w") as data_file:
+                    json.dump(data, data_file, indent=4)
+            finally:
                 my_entry_website.delete(0, 100)
                 my_entry_password.delete(0, 100)
 
@@ -73,8 +99,8 @@ my_label_username.grid(row=2, column=0)
 my_label_password = tkinter.Label(text="Password:")
 my_label_password.grid(row=3, column=0)
 
-my_entry_website = tkinter.Entry(width=35)
-my_entry_website.grid(row=1, column=1, columnspan=2)
+my_entry_website = tkinter.Entry(width=21)
+my_entry_website.grid(row=1, column=1)
 my_entry_website.focus()
 my_entry_username = tkinter.Entry(width=35)
 my_entry_username.insert(0, "juraj@email.com")
@@ -83,6 +109,8 @@ my_entry_password = tkinter.Entry(width=21)
 my_entry_password.grid(row=3, column=1)
 my_button_password = tkinter.Button(text="Generate Password", command=generate_password)
 my_button_password.grid(row=3, column=2)
+my_button_search = tkinter.Button(text="Search", command=search_password)
+my_button_search.grid(row=1, column=2)
 my_button_add = tkinter.Button(text="Add", width=36, command=write_file)
 my_button_add.grid(row=4, column=1,columnspan=2)
 
