@@ -1,5 +1,5 @@
-MY_EMAIL = "XXX"
-MY_PASSWORD = "XXX"
+#MY_EMAIL = "XXX"
+#MY_PASSWORD = "XXX"
 
 import pandas
 import datetime as dt
@@ -7,6 +7,9 @@ import calendar
 import os
 import random
 import smtplib
+
+MY_EMAIL = os.environ.get("MY_EMAIL")
+MY_PASSWORD = os.environ.get("MY_PASSWORD")
 
 data = pandas.read_csv("birthdays.csv")
 now = dt.datetime.now()
