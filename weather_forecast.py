@@ -13,11 +13,13 @@ weather_params = {
     "cnt" : 4,              #count of 3-hour intervals for forecast (4x3 = 12 hours)
     }
 
-
-
-
 response = requests.get(OWM_ENDPOINT, params=weather_params)
 response.raise_for_status()
 weather_data = response.json()
 
+
+for interval in weather_data["list"]:
+    #print(interval["weather"][0]["main"])
+    if interval["weather"][0]["id"] <= 600:
+        print (f"bring an umbrela, the weather will be {interval["weather"][0]["main"]}")
 
