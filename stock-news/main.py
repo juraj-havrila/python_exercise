@@ -10,11 +10,29 @@ STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
 API_KEY_AV = "x"
 API_KEY_NA = "x"
-parameters = {
-    "function": "TIME_SERIES_DAILY",
-    "symbol": STOCK,
-    "apikey": API_KEY_AV,
-}
+
+def check_prices(stock):
+    parameters = {
+        "function": "TIME_SERIES_DAILY",
+        "symbol": STOCK,
+        "apikey": API_KEY_AV,
+    }
+    response = requests.get("https://www.alphavantage.co/query", params=parameters)
+    response.raise_for_status()
+
+    stock_data = response.json()["Time Series (Daily)"]
+
+    price_close_yesterday = int(stock_data[day_before_yesterday]['1. open'])
+    price_close_yesterday = int(stock_data[yesterday]['4. close'])
+
+    if get_change(price_close_yesterday, price_close_yesterday) > 5:
+        return True
+    else:
+        return False
+
+
+
+
 def get_change(current, previous):
     if current == previous:
         return 0
@@ -28,36 +46,30 @@ def get_news(stock):
         "q": stock,
         "from": yesterday,
         "sortBy":"popularity",
+        "language": "en",
         "apiKey": API_KEY_NA,
 
     }
     response = requests.get("https://newsapi.org/v2/everything", params=parameters)
     response.raise_for_status()
 
-    return response.json()[0:2]
+    return response.json()['articles'][0:2]
+
+
+
+
+#if check_prices(STOCK):
+#    my_news = get_news(STOCK)
+#    print(my_news)
+
+#my_news = get_news(STOCK)
+#print(my_news)
 
 
 
 
 
-
-response = requests.get("https://www.alphavantage.co/query", params=parameters)
-response.raise_for_status()
-
-stock_data = response.json()["Time Series (Daily)"]
-
-price_close_yesterday= int(stock_data[day_before_yesterday]['1. open'])
-price_close_yesterday= int(stock_data[yesterday]['4. close'])
-
-if get_change(price_close_yesterday, price_close_yesterday) > 5:
-
-    my_news = get_news(STOCK)
-
-
-
-
-
-print(stock_data)
+#print(stock_data)
 
 ## STEP 1: Use https://www.alphavantage.co
 # When STOCK price increase/decreases by 5% between yesterday and the day before yesterday then print("Get News").
@@ -78,5 +90,6 @@ or
 "TSLA: 🔻5%
 Headline: Were Hedge Funds Right About Piling Into Tesla Inc. (TSLA)?. 
 Brief: We at Insider Monkey have gone over 821 13F filings that hedge funds and prominent investors are required to file by the SEC The 13F filings show the funds' and investors' portfolio positions as of March 31st, near the height of the coronavirus market crash.
+"You don't rise to the level of your goals, you fall to the level of your systems " is a quote that comes to mind.
 """
 
