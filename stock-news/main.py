@@ -1,35 +1,68 @@
 import requests
 import datetime as dt
+import pandas
+import time
+import smtplib
+
+my_email = "x"
+my_password = "x"
+
+data = pandas.read_csv("stocks.csv")
+my_stocks={row['ticker']:(row['trigger_value'],row['trigger_delta']) for (index,row) in data.iterrows()}
+
 
 #now = dt.datetime.now()
 #date_yesterday = str(now.year)+'-'+str(now.month)+'-'+str(now.day)
 today = dt.date.today()
 yesterday = str(today - dt.timedelta(days = 1))
-day_before_yesterday = today - dt.timedelta(days = 2)
+day_before_yesterday = str(today - dt.timedelta(days = 2))
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
 API_KEY_AV = "x"
 API_KEY_NA = "x"
 
-def check_prices(stock):
+my_email_content=''
+
+
+
+
+
+def check_prices(stock,trigger_value,trigger_delta):
     parameters = {
         "function": "TIME_SERIES_DAILY",
-        "symbol": STOCK,
+        "symbol": stock,
         "apikey": API_KEY_AV,
     }
     response = requests.get("https://www.alphavantage.co/query", params=parameters)
     response.raise_for_status()
 
-    stock_data = response.json()["Time Series (Daily)"]
+    print (response.json())
 
-    price_close_yesterday = int(stock_data[day_before_yesterday]['1. open'])
-    price_close_yesterday = int(stock_data[yesterday]['4. close'])
+    stock_data = response.json()['Time Series (Daily)']
 
-    if get_change(price_close_yesterday, price_close_yesterday) > 5:
+    price_open_before_yesterday = float(stock_data[day_before_yesterday]['1. open'])
+    price_close_yesterday = float(stock_data[yesterday]['4. close'])
+
+    price_high_before_yesterday = float(stock_data[day_before_yesterday]['2. high'])
+    price_low_before_yesterday = float(stock_data[day_before_yesterday]['3. low'])
+    price_high_yesterday = float(stock_data[yesterday]['2. high'])
+    price_low_yesterday = float(stock_data[yesterday]['3. low'])
+
+    if get_change(price_open_before_yesterday, price_close_yesterday) > trigger_delta:
+        trigger_percentage = True
+    else:
+        trigger_percentage =  False
+
+    #if min(price_open_before_yesterday, price_close_yesterday) <= trigger_value <=max(price_open_before_yesterday, price_close_yesterday):
+    if min(price_low_before_yesterday, price_low_yesterday) <= trigger_value <= max(price_high_yesterday, price_high_before_yesterday):
+        trigger_price = True
+    else:
+        trigger_price =  False
+
+    if trigger_percentage or trigger_price:
         return True
     else:
         return False
-
 
 
 
@@ -54,6 +87,40 @@ def get_news(stock):
     response.raise_for_status()
 
     return response.json()['articles'][0:2]
+
+
+def send_mail(email_content):
+     #print(email_content)
+     with smtplib.SMTP('smtp.gmail.com', 587) as connection:
+         connection.starttls()
+         connection.login(my_email, my_password)
+         connection.sendmail(
+             from_addr=my_email,
+             to_addrs="x",
+             msg=f"Subject:Stock News\n\n{email_content}"
+         )
+
+
+#####################################################################################################
+
+for my_ticker in my_stocks.keys():
+    time.sleep(21) #free tier in the api only allows 5 calls per minute
+    #my_email_content = ''
+    #print(my_stocks[my_ticker][1])
+    t_value = float(my_stocks[my_ticker][0])
+    t_percent =float(my_stocks[my_ticker][1])
+    if check_prices(my_ticker,t_value,t_percent):
+        my_news=get_news(my_ticker)
+        my_email_content += f"{my_ticker} \n -------------------------------------------- \n"
+        for my_article in my_news:
+            my_email_content += f"{my_article['title']} \n {my_article['description']} \n\n{my_article['url']} \n ______________\n\n"
+
+if (my_email_content):
+    send_mail(my_email_content)
+
+
+#####################################################################################################
+
 
 
 
