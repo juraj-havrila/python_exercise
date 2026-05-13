@@ -1,0 +1,4 @@
+ticker,name,trigger_value,trigger_delta
+TSLA,Tesla Inc,425,10
+IBM,International Business Machines,225,10
+
