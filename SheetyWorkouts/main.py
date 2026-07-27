@@ -27,13 +27,24 @@ def check_calories(user_activity):
     return (response.json())
 
 def upload_to_sheet(my_data):
+    my_now = datetime.datetime.now()
     url = "https://api.sheety.co/b05b05840da8549fdb35022b7485695a/pythonMyWorkouts/workouts"
     headers = {}
-    my_now=datetime.datetime.now()
-    my_day = my_now.strftime("%x")
-    my_time = my_now.strftime("%X")
+    data = {
+        "Date" = my_now.strftime("%x"),
+        "Time" = my_now.strftime("%X"),
+        "Exercise" = my_data["exercises"][0]["name"],
+        "Duration" = my_data["exercises"][0]["duration_min"],
+        "Calories" = my_data["exercises"][0]["nf_calories"],
+    }
+    response = requests.post(url, headers=headers, data=data)
+    response.raise_for_status()
+
+
 
 my_data = check_calories(user_activity)
 
 print(my_data)
+
+print(my_data["exercises"][0]["duration_min"])
 upload_to_sheet(my_data)
