@@ -30,14 +30,16 @@ def upload_to_sheet(my_data):
     my_now = datetime.datetime.now()
     url = "https://api.sheety.co/b05b05840da8549fdb35022b7485695a/pythonMyWorkouts/workouts"
     headers = {}
-    data = {
-        "Date" = my_now.strftime("%x"),
-        "Time" = my_now.strftime("%X"),
-        "Exercise" = my_data["exercises"][0]["name"],
-        "Duration" = my_data["exercises"][0]["duration_min"],
-        "Calories" = my_data["exercises"][0]["nf_calories"],
-    }
-    response = requests.post(url, headers=headers, data=data)
+    data= {
+        "workout" : {
+            "date" : my_now.strftime("%x"),
+            "time" : my_now.strftime("%X"),
+            "exercise" : my_data["exercises"][0]["name"].title(),
+            "duration" : my_data["exercises"][0]["duration_min"],
+            "calories" : my_data["exercises"][0]["nf_calories"],
+            }
+        }
+    response = requests.post(url, json=data)
     response.raise_for_status()
 
 
