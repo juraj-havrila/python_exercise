@@ -3,7 +3,7 @@ import datetime
 
 APP_ID = "app_e072fff872cb4aee818c0fb3"
 API_KEY = "nix_live_NE4J4B3ET53hZ4eJtlfgDpWqsOSZ9xvg"
-
+SHEETY_KEY = "nix_live_NE4J4B3ET53hZ4eJtlfgDpWqsOSZ9xvg"
 
 #x-app-id: app_e072fff872cb4aee818c0fb3
 #x-app-key: nix_live_NE4J4B3ET53hZ4eJtlfgDpWqsOSZ9xvg
@@ -29,7 +29,9 @@ def check_calories(user_activity):
 def upload_to_sheet(my_data):
     my_now = datetime.datetime.now()
     url = "https://api.sheety.co/b05b05840da8549fdb35022b7485695a/pythonMyWorkouts/workouts"
-    headers = {}
+    headers = {
+        "authorization": f"Bearer {SHEETY_KEY}",
+    }
     data= {
         "workout" : {
             "date" : my_now.strftime("%x"),
@@ -39,7 +41,7 @@ def upload_to_sheet(my_data):
             "calories" : my_data["exercises"][0]["nf_calories"],
             }
         }
-    response = requests.post(url, json=data)
+    response = requests.post(url, headers=headers, json=data)
     response.raise_for_status()
 
 
